@@ -35,3 +35,6 @@ tt_mobile-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# vim
+*.swp
+*.swo
