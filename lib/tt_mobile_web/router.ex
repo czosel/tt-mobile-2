@@ -18,6 +18,9 @@ defmodule TtMobileWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "/league/:league", LeagueController, :index
+    live "/test", ThermostatLive
+    live "/assoc", AssociationLive
   end
 
   # Other scopes may use custom stacks.
