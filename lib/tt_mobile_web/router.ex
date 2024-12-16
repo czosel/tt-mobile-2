@@ -21,6 +21,7 @@ defmodule TtMobileWeb.Router do
     get "/league/:league", LeagueController, :index
     live "/test", ThermostatLive
     live "/assoc", AssociationLive
+    live "/club/:club_id", ClubLive
   end
 
   # Other scopes may use custom stacks.
