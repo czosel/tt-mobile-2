@@ -1,8 +1,12 @@
-import Floki
-import String, only: [trim: 1]
+require Floki
+require String
 
 defmodule TtMobile.Scraper do
   @base_url "https://www.click-tt.ch/cgi-bin/WebObjects/nuLigaTTCH.woa/wa/"
+
+  def text(dom) do
+    dom |> Floki.text() |> String.trim()
+  end
 
   def club(club_id) do
     url = "#{@base_url}clubInfoDisplay?club=#{club_id}"
@@ -10,22 +14,22 @@ defmodule TtMobile.Scraper do
 
     data =
       response.body
-      |> find("h2:fl-contains('Rückschau') + table tr")
+      |> Floki.find("h2:fl-contains('Rückschau') + table tr")
       # remove table head
       |> tl
-      |> Enum.map(&children/1)
+      |> Enum.map(&Floki.children/1)
       |> Enum.map(fn row ->
         %{
-          home: row |> Enum.at(6) |> text |> trim,
-          guest: row |> Enum.at(8) |> text |> trim,
-          result: row |> Enum.at(10) |> text |> trim,
-          href: row |> Enum.at(10) |> attribute("a", "href") |> Enum.at(0),
+          home: row |> Enum.at(6) |> text,
+          guest: row |> Enum.at(8) |> text,
+          result: row |> Enum.at(10) |> text,
+          href: row |> Enum.at(10) |> Floki.attribute("a", "href") |> Enum.at(0)
         }
       end)
 
     name =
       response.body
-      |> find("h1")
+      |> Floki.find("h1")
       |> Enum.map(&Floki.children/1)
       |> Enum.at(0)
       |> Enum.at(2)
@@ -36,8 +40,6 @@ defmodule TtMobile.Scraper do
       on_conflict: [set: [name: name]],
       conflict_target: :id
     )
-
-    dbg(data)
 
     %{
       club_id: club_id,
