@@ -4,8 +4,29 @@ require String
 defmodule TtMobile.Scraper do
   @base_url "https://www.click-tt.ch/cgi-bin/WebObjects/nuLigaTTCH.woa/wa/"
 
-  def text(dom) do
+  defp text(dom) do
     dom |> Floki.text() |> String.trim()
+  end
+
+  def region_schedule(championship, date \\ Date.utc_today()) do
+    url = "#{@base_url}regionMeetingFilter"
+    monday = Date.beginning_of_week(date)
+    day_of_year = Date.day_of_year(monday)
+    month = (Calendar.strftime(monday, "%m") |> String.to_integer()) - 1
+
+    response = HTTPoison.post!(url, {:form, [
+      {:championship, championship},
+      {:month, month},
+      {:dayOfYear, day_of_year},
+      {:filterHomeGuestBackup, :false}
+    ]})
+
+    # still WIP
+    data =
+      response.body
+      |> Floki.find("table.result-set > tr:not(:first-child)")
+      |> Enum.map(&Floki.children/1)
+    data
   end
 
   def club(club_id) do
