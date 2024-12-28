@@ -32,7 +32,7 @@ defmodule TtMobileWeb.ClubLive do
      socket
      |> assign_club(club_id)
      |> assign(:data, data)
-     |> assign(:updated, true)}
+    }
   end
 
   def handle_async(:scrape, {:exit, reason}, socket) do

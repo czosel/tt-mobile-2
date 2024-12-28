@@ -17,10 +17,9 @@ defmodule TtMobileWeb.Router do
   scope "/", TtMobileWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", HomeLive
+    live "/assoc/:assoc_id", AssociationLive
     get "/league/:league", LeagueController, :index
-    live "/test", ThermostatLive
-    live "/assoc", AssociationLive
     live "/club/:club_id", ClubLive
   end
 

@@ -6,8 +6,8 @@ import Config
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :tt_mobile, TtMobile.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "ttmobile",
+  password: "ttmobile",
   hostname: "localhost",
   database: "tt_mobile_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
