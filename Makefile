@@ -10,3 +10,7 @@ help: ## Show the help messages
 .PHONY: dbshell
 dbshell:
 	docker-compose exec db psql -U ttmobile
+
+.PHONY: format
+format:
+	mix format mix.exs "lib/**/*.{ex,exs}" "test/**/*.{ex,exs}"

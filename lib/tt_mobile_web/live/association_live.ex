@@ -1,7 +1,7 @@
 defmodule TtMobileWeb.AssociationLive do
   use TtMobileWeb, :live_view
 
-  alias TtMobile.Association
+  alias TtMobile.Associations
   alias TtMobile.Repo
   alias TtMobile.Scraper
 
@@ -30,8 +30,7 @@ defmodule TtMobileWeb.AssociationLive do
   def handle_async(:scrape, {:ok, assoc_id}, socket) do
     {:noreply,
      socket
-     |> assign_assoc(assoc_id)
-    }
+     |> assign_assoc(assoc_id)}
   end
 
   def handle_async(:scrape, {:exit, reason}, socket) do
@@ -40,11 +39,10 @@ defmodule TtMobileWeb.AssociationLive do
     {:noreply, socket}
   end
 
-
   defp assign_assoc(socket, assoc_id) do
-    assoc = Repo.get(Association, assoc_id) |> Repo.preload(:leagues)
+    assoc = Associations.get_association!(assoc_id)
 
     socket
-      |> assign(assoc: assoc)
+    |> assign(assoc: assoc)
   end
 end

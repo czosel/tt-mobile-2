@@ -69,7 +69,10 @@ defmodule TtMobileWeb.AssociationLiveTest do
     test "deletes association in listing", %{conn: conn, association: association} do
       {:ok, index_live, _html} = live(conn, ~p"/associations")
 
-      assert index_live |> element("#associations-#{association.id} a", "Delete") |> render_click()
+      assert index_live
+             |> element("#associations-#{association.id} a", "Delete")
+             |> render_click()
+
       refute has_element?(index_live, "#associations-#{association.id}")
     end
   end

@@ -3,6 +3,6 @@ defmodule TtMobile.League do
 
   schema "league" do
     field :name, :string
-    belongs_to :association, TtMobile.Association
+    belongs_to :association, TtMobile.Associations.Association
   end
 end

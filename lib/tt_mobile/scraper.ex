@@ -8,6 +8,9 @@ defmodule TtMobile.Scraper do
   @root_url "https://www.click-tt.ch"
   @base_url "#{@root_url}/cgi-bin/WebObjects/nuLigaTTCH.woa/wa/"
 
+  alias TtMobile.Repo
+  alias TtMobile.Associations.Association
+
   defp text(dom) do
     dom |> Floki.text() |> String.trim()
   end
@@ -18,18 +21,24 @@ defmodule TtMobile.Scraper do
     day_of_year = Date.day_of_year(monday)
     month = (Calendar.strftime(monday, "%m") |> String.to_integer()) - 1
 
-    response = HTTPoison.post!(url, {:form, [
-      {:championship, championship},
-      {:month, month},
-      {:dayOfYear, day_of_year},
-      {:filterHomeGuestBackup, :false}
-    ]})
+    response =
+      HTTPoison.post!(
+        url,
+        {:form,
+         [
+           {:championship, championship},
+           {:month, month},
+           {:dayOfYear, day_of_year},
+           {:filterHomeGuestBackup, false}
+         ]}
+      )
 
     # still WIP
     data =
       response.body
       |> Floki.find("table.result-set > tr:not(:first-child)")
       |> Enum.map(&Floki.children/1)
+
     data
   end
 
@@ -43,36 +52,42 @@ defmodule TtMobile.Scraper do
 
   def associations() do
     response = HTTPoison.get!("#{@root_url}/index.htm.de")
-    assocs = response.body
+
+    assocs =
+      response.body
       |> Floki.find("div#navigation li strong:fl-contains('Spielbetrieb') + ul li a")
       |> Enum.map(fn link ->
         %{
-          code: link
+          code:
+            link
             |> Floki.attribute("href")
             |> Enum.at(0)
             |> extract_query_param("championship"),
           name: link |> text()
         }
-        end)
-
-    found_codes = Enum.map(assocs, &(&1.code))
-
-    existing = TtMobile.Repo.all(
-      from a in "association",
-      where: a.code in ^found_codes,
-      select: a.code
-    )
-    assocs
-      |> Enum.filter(fn a -> a.code not in existing end)
-      |> Enum.each(fn assoc ->
-        TtMobile.Repo.insert!(struct(TtMobile.Association, assoc))
       end)
+
+    found_codes = Enum.map(assocs, & &1.code)
+
+    # TODO use context
+    existing =
+      Repo.all(
+        Association,
+        where: a.code in ^found_codes,
+        select: a.code
+      )
+
+    assocs
+    |> Enum.filter(fn a -> a.code not in existing end)
+    |> Enum.each(fn assoc ->
+      Repo.insert!(struct(Association, assoc))
+    end)
 
     assocs
   end
 
   def association(assoc_id) do
-    code = TtMobile.Repo.get(TtMobile.Association, assoc_id).code
+    code = Repo.get(Association, assoc_id).code
 
     url = "#{@base_url}leaguePage?championship=#{URI.encode(code)}"
     response = HTTPoison.get!(url)
@@ -82,7 +97,8 @@ defmodule TtMobile.Scraper do
       |> Floki.find("table.matrix td ul li span a")
       |> Enum.map(fn link ->
         %{
-          id: link
+          id:
+            link
             |> Floki.attribute("href")
             |> Enum.at(0)
             |> extract_query_param("group")
@@ -92,18 +108,21 @@ defmodule TtMobile.Scraper do
         }
       end)
 
-    found_leagues = Enum.map(leagues, &(&1.id))
+    found_leagues = Enum.map(leagues, & &1.id)
 
-    existing = TtMobile.Repo.all(
-      from l in "league",
-      where: l.id in ^found_leagues,
-      select: l.id
-    )
+    # TODO use context
+    existing =
+      Repo.all(
+        from l in "league",
+          where: l.id in ^found_leagues,
+          select: l.id
+      )
+
     leagues
-      |> Enum.filter(fn l -> l.id not in existing end)
-      |> Enum.each(fn league ->
-        TtMobile.Repo.insert!(struct(TtMobile.League, league))
-      end)
+    |> Enum.filter(fn l -> l.id not in existing end)
+    |> Enum.each(fn league ->
+      Repo.insert!(struct(TtMobile.League, league))
+    end)
 
     assoc_id
   end
@@ -135,7 +154,8 @@ defmodule TtMobile.Scraper do
       |> Enum.at(2)
       |> String.trim()
 
-    TtMobile.Repo.insert!(
+    # TODO use context
+    Repo.insert!(
       %TtMobile.Club{id: club_id |> String.to_integer(), name: name},
       on_conflict: [set: [name: name]],
       conflict_target: :id
