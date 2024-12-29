@@ -9,6 +9,9 @@ defmodule TtMobile.Scraper do
   @base_url "#{@root_url}/cgi-bin/WebObjects/nuLigaTTCH.woa/wa/"
 
   alias TtMobile.Repo
+  alias TtMobile.Leagues
+  alias TtMobile.Leagues.League
+  alias TtMobile.Associations
   alias TtMobile.Associations.Association
 
   defp text(dom) do
@@ -67,27 +70,15 @@ defmodule TtMobile.Scraper do
         }
       end)
 
-    found_codes = Enum.map(assocs, & &1.code)
-
-    # TODO use context
-    existing =
-      Repo.all(
-        Association,
-        where: a.code in ^found_codes,
-        select: a.code
-      )
-
-    assocs
-    |> Enum.filter(fn a -> a.code not in existing end)
-    |> Enum.each(fn assoc ->
-      Repo.insert!(struct(Association, assoc))
+    Enum.each(assocs, fn assoc ->
+      Associations.create_association(assoc)
     end)
 
     assocs
   end
 
   def association(assoc_id) do
-    code = Repo.get(Association, assoc_id).code
+    code = Repo.get!(Association, assoc_id).code
 
     url = "#{@base_url}leaguePage?championship=#{URI.encode(code)}"
     response = HTTPoison.get!(url)
@@ -104,24 +95,12 @@ defmodule TtMobile.Scraper do
             |> extract_query_param("group")
             |> String.to_integer(),
           name: link |> text(),
-          association_id: String.to_integer(assoc_id)
+          association_id: assoc_id
         }
       end)
 
-    found_leagues = Enum.map(leagues, & &1.id)
-
-    # TODO use context
-    existing =
-      Repo.all(
-        from l in "league",
-          where: l.id in ^found_leagues,
-          select: l.id
-      )
-
-    leagues
-    |> Enum.filter(fn l -> l.id not in existing end)
-    |> Enum.each(fn league ->
-      Repo.insert!(struct(TtMobile.League, league))
+    Enum.each(leagues, fn league ->
+      Leagues.create_league(league)
     end)
 
     assoc_id

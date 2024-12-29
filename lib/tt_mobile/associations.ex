@@ -13,7 +13,7 @@ defmodule TtMobile.Associations do
   end
 
   @doc """
-  Creates a association.
+  Creates an association.
 
   ## Examples
 
@@ -24,7 +24,7 @@ defmodule TtMobile.Associations do
       {:error, ...}
 
   """
-  def create_association(attrs \\ %{}) do
+  def create_association(attrs) do
     %Association{}
     |> Association.changeset(attrs)
     |> Repo.insert()
