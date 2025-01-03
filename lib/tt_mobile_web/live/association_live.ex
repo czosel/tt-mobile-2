@@ -11,7 +11,7 @@ defmodule TtMobileWeb.AssociationLive do
       <h1>{@assoc.name}</h1>
       <ul>
         <li :for={league <- @assoc.leagues}>
-          {league.name}
+          <.link navigate={~p"/league/#{league.id}"}>{league.name}</.link>
         </li>
       </ul>
     </div>

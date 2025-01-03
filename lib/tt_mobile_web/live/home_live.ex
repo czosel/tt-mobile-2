@@ -8,7 +8,7 @@ defmodule TtMobileWeb.HomeLive do
     Associations
     <ul>
       <li :for={assoc <- @associations}>
-        <.link patch={~p"/assoc/#{assoc.id}"}>{assoc.name}</.link>
+        <.link navigate={~p"/assoc/#{assoc.id}"}>{assoc.name}</.link>
       </li>
     </ul>
     """

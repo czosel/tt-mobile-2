@@ -4,12 +4,12 @@ defmodule TtMobile.Leagues do
 
   alias TtMobile.Leagues.League
 
-  def list_leagues do
-    Repo.all(League)
+  def get_league!(id) do
+    Repo.get!(League, id) |> Repo.preload([:association, :teams])
   end
 
-  def get_league(id) do
-    Repo.get(League, id)
+  def get_team_by_name(league, name) do
+    Enum.find(league.teams, fn team -> team.name == name end) |> IO.inspect()
   end
 
   @doc """

@@ -9,7 +9,7 @@ defmodule TtMobile.Associations do
   end
 
   def get_association!(id) do
-    Repo.get(Association, id) |> Repo.preload(:leagues)
+    Repo.get!(Association, id) |> Repo.preload(:leagues)
   end
 
   @doc """

@@ -19,7 +19,7 @@ defmodule TtMobileWeb.Router do
 
     live "/", HomeLive
     live "/assoc/:assoc_id", AssociationLive
-    get "/league/:league", LeagueController, :index
+    live "/league/:league_id", LeagueLive
     live "/club/:club_id", ClubLive
   end
 
