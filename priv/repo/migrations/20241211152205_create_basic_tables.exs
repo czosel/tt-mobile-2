@@ -27,11 +27,15 @@ defmodule TtMobile.Repo.Migrations.CreateBasicTables do
       add :league_id, references(:league)
     end
 
-    create table(:game, primary_key: false) do
-      add :id, :integer, primary_key: true
+    create table(:game) do
+      add :code, :string
+      add :start, :naive_datetime
       add :home_team_id, references(:team)
       add :guest_team_id, references(:team)
       add :result, :string
     end
+
+    create unique_index(:game, [:code])
+    create unique_index(:game, [:start, :home_team_id, :guest_team_id], name: :unique_game)
   end
 end

@@ -118,7 +118,7 @@ defmodule TtMobile.Scraper do
       |> Enum.map(&Floki.children/1)
       |> Enum.map(fn row ->
         %{
-          id:
+          code:
             row
             |> Enum.at(9)
             |> Floki.attribute("a", "href")
@@ -137,17 +137,25 @@ defmodule TtMobile.Scraper do
         guest_team = Leagues.get_team_by_name(league, attrs.guest)
 
         %{
-          id: attrs.id,
+          code: attrs.code,
+          start: to_naive_datetime(attrs.date, attrs.time),
           home_team_id: home_team.id,
           guest_team_id: guest_team.id,
           result: attrs.result
         }
       end)
-      |> Enum.filter(fn attrs -> attrs.result != "" end)
       |> IO.inspect()
       |> Enum.map(&Games.create_game/1)
 
     league_id
+  end
+
+  def to_naive_datetime(
+        <<dd::binary-2, ".", mm::binary-2, ".", yyyy::binary-4>>,
+        <<h::binary-2, ":", m::binary-2>> <> _rest
+      ) do
+    [yyyy, mm, dd, h, m] = for i <- [yyyy, mm, dd, h, m], do: String.to_integer(i)
+    NaiveDateTime.new!(yyyy, mm, dd, h, m, 0)
   end
 
   def league_teams(league_id) do
@@ -158,23 +166,22 @@ defmodule TtMobile.Scraper do
 
     response = HTTPoison.get!(url)
 
-    data =
-      response.body
-      |> Floki.find("table.result-set > tr:not(:first-child)")
-      |> Enum.map(&Floki.children/1)
-      |> Enum.map(fn row ->
-        %{
-          id:
-            row
-            |> Enum.at(2)
-            |> Floki.attribute("a", "href")
-            |> Enum.at(0)
-            |> extract_query_param("teamtable"),
-          name: row |> Enum.at(2) |> text,
-          league_id: league_id
-        }
-      end)
-      |> Enum.map(&Teams.create_team/1)
+    response.body
+    |> Floki.find("table.result-set > tr:not(:first-child)")
+    |> Enum.map(&Floki.children/1)
+    |> Enum.map(fn row ->
+      %{
+        id:
+          row
+          |> Enum.at(2)
+          |> Floki.attribute("a", "href")
+          |> Enum.at(0)
+          |> extract_query_param("teamtable"),
+        name: row |> Enum.at(2) |> text,
+        league_id: league_id
+      }
+    end)
+    |> Enum.map(&Teams.create_team/1)
 
     league_id
   end
