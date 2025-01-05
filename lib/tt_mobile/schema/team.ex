@@ -9,11 +9,32 @@ defmodule TtMobile.Teams.Team do
     field :name, :string
     belongs_to :club, TtMobile.Clubs.Club
     belongs_to :league, TtMobile.Leagues.League
+    field :game_count, :integer
+    field :win_count, :integer
+    field :draw_count, :integer
+    field :lose_count, :integer
+    field :games_won, :integer
+    field :games_lost, :integer
+    field :points_won, :integer
+    field :points_lost, :integer
   end
 
   def changeset(team, attrs) do
     team
-    |> cast(attrs, [:id, :name, :league_id, :club_id])
+    |> cast(attrs, [
+      :id,
+      :name,
+      :league_id,
+      :club_id,
+      :game_count,
+      :win_count,
+      :draw_count,
+      :lose_count,
+      :games_won,
+      :games_lost,
+      :points_won,
+      :points_lost
+    ])
     |> validate_required([:name])
     |> unique_constraint(:id, name: :team_pkey)
   end

@@ -112,40 +112,38 @@ defmodule TtMobile.Scraper do
 
     response = HTTPoison.get!(url)
 
-    data =
-      response.body
-      |> Floki.find("table.result-set > tr:not(:first-child)")
-      |> Enum.map(&Floki.children/1)
-      |> Enum.map(fn row ->
-        %{
-          code:
-            row
-            |> Enum.at(9)
-            |> Floki.attribute("a", "href")
-            |> Enum.at(0)
-            |> extract_query_param("meeting"),
-          date: row |> Enum.at(1) |> text,
-          time: row |> Enum.at(2) |> text,
-          home: row |> Enum.at(5) |> text,
-          guest: row |> Enum.at(7) |> text,
-          result: row |> Enum.at(9) |> text
-        }
-      end)
-      |> fill_dates()
-      |> Enum.map(fn attrs ->
-        home_team = Leagues.get_team_by_name(league, attrs.home)
-        guest_team = Leagues.get_team_by_name(league, attrs.guest)
+    response.body
+    |> Floki.find("table.result-set > tr:not(:first-child)")
+    |> Enum.map(&Floki.children/1)
+    |> Enum.map(fn row ->
+      %{
+        code:
+          row
+          |> Enum.at(9)
+          |> Floki.attribute("a", "href")
+          |> Enum.at(0)
+          |> extract_query_param("meeting"),
+        date: row |> Enum.at(1) |> text,
+        time: row |> Enum.at(2) |> text,
+        home: row |> Enum.at(5) |> text,
+        guest: row |> Enum.at(7) |> text,
+        result: row |> Enum.at(9) |> text
+      }
+    end)
+    |> fill_dates()
+    |> Enum.map(fn attrs ->
+      home_team = Leagues.get_team_by_name(league, attrs.home)
+      guest_team = Leagues.get_team_by_name(league, attrs.guest)
 
-        %{
-          code: attrs.code,
-          start: to_naive_datetime(attrs.date, attrs.time),
-          home_team_id: home_team.id,
-          guest_team_id: guest_team.id,
-          result: attrs.result
-        }
-      end)
-      |> IO.inspect()
-      |> Enum.map(&Games.create_game/1)
+      %{
+        code: attrs.code,
+        start: to_naive_datetime(attrs.date, attrs.time),
+        home_team_id: home_team.id,
+        guest_team_id: guest_team.id,
+        result: attrs.result
+      }
+    end)
+    |> Enum.map(&Games.create_game/1)
 
     league_id
   end
@@ -158,7 +156,7 @@ defmodule TtMobile.Scraper do
     NaiveDateTime.new!(yyyy, mm, dd, h, m, 0)
   end
 
-  def league_teams(league_id) do
+  def league_table(league_id) do
     league = Leagues.get_league!(league_id)
 
     url =
@@ -170,6 +168,20 @@ defmodule TtMobile.Scraper do
     |> Floki.find("table.result-set > tr:not(:first-child)")
     |> Enum.map(&Floki.children/1)
     |> Enum.map(fn row ->
+      [games_won, games_lost] =
+        row
+        |> Enum.at(7)
+        |> text()
+        |> String.split(":")
+        |> Enum.map(&String.to_integer/1)
+
+      [points_won, points_lost] =
+        row
+        |> Enum.at(9)
+        |> text()
+        |> String.split(":")
+        |> Enum.map(&String.to_integer/1)
+
       %{
         id:
           row
@@ -178,6 +190,14 @@ defmodule TtMobile.Scraper do
           |> Enum.at(0)
           |> extract_query_param("teamtable"),
         name: row |> Enum.at(2) |> text,
+        game_count: row |> Enum.at(3) |> text,
+        win_count: row |> Enum.at(4) |> text,
+        draw_count: row |> Enum.at(5) |> text,
+        lose_count: row |> Enum.at(6) |> text,
+        games_won: games_won,
+        games_lost: games_lost,
+        points_won: points_won,
+        points_lost: points_lost,
         league_id: league_id
       }
     end)
@@ -188,7 +208,7 @@ defmodule TtMobile.Scraper do
 
   def league(league_id) do
     league_id
-    |> league_teams()
+    |> league_table()
     |> league_schedule()
   end
 
