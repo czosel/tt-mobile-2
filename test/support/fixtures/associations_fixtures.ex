@@ -14,7 +14,7 @@ defmodule TtMobile.AssociationsFixtures do
         name: "Nationalliga 2024/25",
         code: "STT 24/25"
       })
-      |> TtMobile.Associations.create_association()
+      |> TtMobile.Associations.upsert_association()
 
     association
   end

@@ -13,20 +13,20 @@ defmodule TtMobile.Associations do
   end
 
   @doc """
-  Creates an association.
+  Upserts an association.
 
   ## Examples
 
-      iex> create_association(%{field: value})
+      iex> upsert_association(%{field: value})
       {:ok, %Association{}}
 
-      iex> create_association(%{field: bad_value})
+      iex> upsert_association(%{field: bad_value})
       {:error, ...}
 
   """
-  def create_association(attrs) do
+  def upsert_association(attrs) do
     %Association{}
     |> Association.changeset(attrs)
-    |> Repo.insert()
+    |> Repo.insert(on_conflict: {:replace, [:name]}, conflict_target: [:code])
   end
 end

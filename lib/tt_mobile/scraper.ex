@@ -58,25 +58,21 @@ defmodule TtMobile.Scraper do
   def associations() do
     response = HTTPoison.get!("#{@root_url}/index.htm.de")
 
-    assocs =
-      response.body
-      |> Floki.find("div#navigation li strong:fl-contains('Spielbetrieb') + ul li a")
-      |> Enum.map(fn link ->
-        %{
-          code:
-            link
-            |> Floki.attribute("href")
-            |> Enum.at(0)
-            |> extract_query_param("championship"),
-          name: link |> text()
-        }
-      end)
-
-    Enum.each(assocs, fn assoc ->
-      Associations.create_association(assoc)
+    response.body
+    |> Floki.find("div#navigation li strong:fl-contains('Spielbetrieb') + ul li a")
+    |> Enum.map(fn link ->
+      %{
+        code:
+          link
+          |> Floki.attribute("href")
+          |> Enum.at(0)
+          |> extract_query_param("championship"),
+        name: link |> text()
+      }
     end)
-
-    assocs
+    |> Enum.map(fn assoc ->
+      Associations.upsert_association(assoc)
+    end)
   end
 
   def association(assoc_id) do
