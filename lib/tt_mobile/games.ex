@@ -8,12 +8,12 @@ defmodule TtMobile.Games do
     Repo.get!(Game, id)
   end
 
-  @doc """
-  Creates a game.
-  """
-  def create_game(attrs) do
+  def upsert_game(attrs) do
     %Game{}
     |> Game.changeset(attrs)
-    |> Repo.insert()
+    |> Repo.insert(
+      on_conflict: {:replace, [:start, :result, :home_team_id, :guest_team_id]},
+      conflict_target: [:code]
+    )
   end
 end

@@ -8,12 +8,24 @@ defmodule TtMobile.Teams do
     Repo.get!(Team, id)
   end
 
-  @doc """
-  Creates a team.
-  """
-  def create_team(attrs) do
+  def upsert_team(attrs) do
     %Team{}
     |> Team.changeset(attrs)
-    |> Repo.insert()
+    |> Repo.insert(
+      on_conflict:
+        {:replace,
+         [
+           :name,
+           :game_count,
+           :win_count,
+           :draw_count,
+           :lose_count,
+           :games_won,
+           :games_lost,
+           :points_won,
+           :points_lost
+         ]},
+      conflict_target: [:id]
+    )
   end
 end

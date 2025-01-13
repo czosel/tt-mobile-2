@@ -12,18 +12,6 @@ defmodule TtMobile.Associations do
     Repo.get!(Association, id) |> Repo.preload(:leagues)
   end
 
-  @doc """
-  Upserts an association.
-
-  ## Examples
-
-      iex> upsert_association(%{field: value})
-      {:ok, %Association{}}
-
-      iex> upsert_association(%{field: bad_value})
-      {:error, ...}
-
-  """
   def upsert_association(attrs) do
     %Association{}
     |> Association.changeset(attrs)

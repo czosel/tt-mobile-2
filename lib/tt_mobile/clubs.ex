@@ -12,12 +12,9 @@ defmodule TtMobile.Clubs do
     Repo.get!(Club, id)
   end
 
-  @doc """
-  Creates a club.
-  """
-  def create_club(attrs) do
+  def upsert_club(attrs) do
     %Club{}
     |> Club.changeset(attrs)
-    |> Repo.insert()
+    |> Repo.insert(on_conflict: {:replace, [:name]}, conflict_target: [:id])
   end
 end

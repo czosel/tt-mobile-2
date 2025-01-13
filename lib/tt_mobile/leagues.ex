@@ -13,17 +13,9 @@ defmodule TtMobile.Leagues do
     Enum.find(league.teams, fn team -> team.name == name end) |> IO.inspect()
   end
 
-  @doc """
-  Creates a league.
-
-  # Example
-
-      iex> create_league(%{field: value})
-      {:ok, %League{}}
-  """
-  def create_league(attrs) do
+  def upsert_league(attrs) do
     %League{}
     |> League.changeset(attrs)
-    |> Repo.insert()
+    |> Repo.insert(on_conflict: {:replace, [:name]}, conflict_target: [:id])
   end
 end

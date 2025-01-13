@@ -13,6 +13,7 @@ defmodule TtMobile.Scraper do
   alias TtMobile.Associations
   alias TtMobile.Teams
   alias TtMobile.Games
+  alias TtMobile.Players
 
   defp text(dom) do
     dom |> Floki.text() |> String.trim()
@@ -70,9 +71,7 @@ defmodule TtMobile.Scraper do
         name: link |> text()
       }
     end)
-    |> Enum.map(fn assoc ->
-      Associations.upsert_association(assoc)
-    end)
+    |> Enum.map(&Associations.upsert_association/1)
   end
 
   def association(assoc_id) do
@@ -95,7 +94,7 @@ defmodule TtMobile.Scraper do
         association_id: assoc_id
       }
     end)
-    |> Enum.map(&Leagues.create_league/1)
+    |> Enum.map(&Leagues.upsert_league/1)
 
     assoc_id
   end
@@ -139,7 +138,7 @@ defmodule TtMobile.Scraper do
         result: attrs.result
       }
     end)
-    |> Enum.map(&Games.create_game/1)
+    |> Enum.map(&Games.upsert_game/1)
 
     league_id
   end
@@ -197,7 +196,7 @@ defmodule TtMobile.Scraper do
         league_id: league_id
       }
     end)
-    |> Enum.map(&Teams.create_team/1)
+    |> Enum.map(&Teams.upsert_team/1)
 
     league_id
   end
@@ -212,7 +211,7 @@ defmodule TtMobile.Scraper do
     # infer missing dates from previous row
     data
     |> Enum.with_index()
-    |> Enum.reduce([], fn {row, index}, acc ->
+    |> Enum.reduce([], fn {row, _}, acc ->
       if row.date == "" do
         [%{row | date: Enum.at(acc, 0).date} | acc]
       else
@@ -220,6 +219,43 @@ defmodule TtMobile.Scraper do
       end
     end)
     |> Enum.reverse()
+  end
+
+  def team(team_id) do
+    url = "#{@base_url}teamPortrait?teamtable=#{team_id}"
+    response = HTTPoison.get!(url)
+
+    players =
+      response.body
+      |> Floki.find("#content-row2 table.result-set:last-of-type tr")
+      |> Enum.map(&Floki.children/1)
+      |> Enum.filter(fn row ->
+        maybe_link = Enum.at(row, 1) |> Floki.children() |> Enum.at(0)
+
+        case is_tuple(maybe_link) do
+          false -> false
+          true -> maybe_link |> elem(0) == "a"
+        end
+      end)
+      |> Enum.map(fn row ->
+        name = row |> Enum.at(1)
+
+        %{
+          id:
+            name
+            |> Floki.children()
+            |> Enum.at(0)
+            |> Floki.attribute("href")
+            |> Enum.at(0)
+            |> extract_query_param("person")
+            |> String.to_integer(),
+          name: name |> text,
+          classification: row |> Enum.at(2) |> text
+        }
+      end)
+      |> Enum.map(&Players.upsert_player/1)
+
+    team_id
   end
 
   def club(club_id) do

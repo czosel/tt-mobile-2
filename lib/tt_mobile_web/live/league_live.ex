@@ -26,7 +26,9 @@ defmodule TtMobileWeb.LeagueLive do
           <%= for team <- @league.teams do %>
             <tr>
               <td></td>
-              <td>{team.name}</td>
+              <td>
+                <.link navigate={~p"/team/#{team.id}"}>{team.name}</.link>
+              </td>
               <td>{team.game_count}</td>
               <td>{team.win_count}</td>
               <td>{team.draw_count}</td>

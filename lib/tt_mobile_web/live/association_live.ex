@@ -2,7 +2,6 @@ defmodule TtMobileWeb.AssociationLive do
   use TtMobileWeb, :live_view
 
   alias TtMobile.Associations
-  alias TtMobile.Repo
   alias TtMobile.Scraper
 
   def render(assigns) do
