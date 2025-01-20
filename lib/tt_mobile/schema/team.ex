@@ -9,6 +9,11 @@ defmodule TtMobile.Teams.Team do
     field :name, :string
     belongs_to :club, TtMobile.Clubs.Club
     belongs_to :league, TtMobile.Leagues.League
+
+    many_to_many :players, TtMobile.Players.Player,
+      join_through: "player_team",
+      on_replace: :delete
+
     field :game_count, :integer
     field :win_count, :integer
     field :draw_count, :integer

@@ -50,5 +50,10 @@ defmodule TtMobile.Repo.Migrations.CreateBasicTables do
       add :id, :integer, primary_key: true
       add :name, :string
     end
+
+    create table(:player_team, primary_key: false) do
+      add :player_id, references(:player), primary_key: true
+      add :team_id, references(:team), primary_key: true
+    end
   end
 end

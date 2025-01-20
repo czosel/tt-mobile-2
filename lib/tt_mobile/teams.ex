@@ -5,7 +5,7 @@ defmodule TtMobile.Teams do
   alias TtMobile.Teams.Team
 
   def get_team!(id) do
-    Repo.get!(Team, id)
+    Repo.get!(Team, id) |> Repo.preload(:players)
   end
 
   def upsert_team(attrs) do

@@ -250,10 +250,16 @@ defmodule TtMobile.Scraper do
             |> extract_query_param("person")
             |> String.to_integer(),
           name: name |> text,
-          classification: row |> Enum.at(2) |> text
+          team_id: team_id
+          # classification: row |> Enum.at(2) |> text
         }
       end)
-      |> Enum.map(&Players.upsert_player/1)
+
+    players
+    |> Enum.map(&Players.upsert_player/1)
+
+    players
+    |> Enum.map(fn pl -> Players.upsert_player_team(pl.id, String.to_integer(team_id)) end)
 
     team_id
   end

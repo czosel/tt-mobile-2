@@ -7,6 +7,11 @@ defmodule TtMobileWeb.TeamLive do
     ~H"""
     <div :if={@team}>
       <h1>{@team.name}</h1>
+      <table>
+        <tr :for={player <- @team.players}>
+          <td>{player.name}</td>
+        </tr>
+      </table>
     </div>
     """
   end
