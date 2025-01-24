@@ -99,11 +99,9 @@ defmodule TtMobile.Scraper do
     assoc_id
   end
 
-  def league_schedule(league_id) do
-    league = Leagues.get_league!(league_id)
-
+  def league_schedule(league) do
     url =
-      "#{@base_url}groupPage?displayTyp=gesamt&displayDetail=meetings&championship=#{URI.encode(league.association.code)}&group=#{league_id}"
+      "#{@base_url}groupPage?displayTyp=gesamt&displayDetail=meetings&championship=#{URI.encode(league.association.code)}&group=#{league.id}"
 
     response = HTTPoison.get!(url)
 
@@ -133,6 +131,7 @@ defmodule TtMobile.Scraper do
       %{
         code: attrs.code,
         start: to_naive_datetime(attrs.date, attrs.time),
+        league_id: league.id,
         home_team_id: home_team.id,
         guest_team_id: guest_team.id,
         result: attrs.result
@@ -140,7 +139,7 @@ defmodule TtMobile.Scraper do
     end)
     |> Enum.map(&Games.upsert_game/1)
 
-    league_id
+    league
   end
 
   def to_naive_datetime(
@@ -151,11 +150,9 @@ defmodule TtMobile.Scraper do
     NaiveDateTime.new!(yyyy, mm, dd, h, m, 0)
   end
 
-  def league_table(league_id) do
-    league = Leagues.get_league!(league_id)
-
+  def league_table(league) do
     url =
-      "#{@base_url}groupPage?displayTyp=gesamt&displayDetail=table&championship=#{URI.encode(league.association.code)}&group=#{league_id}"
+      "#{@base_url}groupPage?displayTyp=gesamt&displayDetail=table&championship=#{URI.encode(league.association.code)}&group=#{league.id}"
 
     response = HTTPoison.get!(url)
 
@@ -193,18 +190,20 @@ defmodule TtMobile.Scraper do
         games_lost: games_lost,
         points_won: points_won,
         points_lost: points_lost,
-        league_id: league_id
+        league_id: league.id
       }
     end)
     |> Enum.map(&Teams.upsert_team/1)
 
-    league_id
+    league
   end
 
   def league(league_id) do
     league_id
+    |> Leagues.get_league!(preload: [:association, :teams])
     |> league_table()
     |> league_schedule()
+    |> Map.fetch!(:id)
   end
 
   defp fill_dates(data) do

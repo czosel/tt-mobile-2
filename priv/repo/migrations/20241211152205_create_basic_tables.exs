@@ -38,6 +38,7 @@ defmodule TtMobile.Repo.Migrations.CreateBasicTables do
     create table(:game) do
       add :code, :string
       add :start, :naive_datetime
+      add :league_id, references(:league)
       add :home_team_id, references(:team)
       add :guest_team_id, references(:team)
       add :result, :string

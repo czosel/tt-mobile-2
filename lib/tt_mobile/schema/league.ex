@@ -8,6 +8,7 @@ defmodule TtMobile.Leagues.League do
   schema "league" do
     field :name, :string
     belongs_to :association, TtMobile.Associations.Association
+    has_many :games, TtMobile.Games.Game
     has_many :teams, TtMobile.Teams.Team
   end
 

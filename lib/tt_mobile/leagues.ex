@@ -4,9 +4,10 @@ defmodule TtMobile.Leagues do
 
   alias TtMobile.Leagues.League
 
-  def get_league!(id) do
-    # TODO separate methods for preloads?
-    Repo.get!(League, id) |> Repo.preload([:association, :teams])
+  def get_league!(id, opts \\ []) do
+    League
+    |> Repo.get!(id)
+    |> Repo.preload(Keyword.get(opts, :preload, []))
   end
 
   def get_team_by_name(league, name) do

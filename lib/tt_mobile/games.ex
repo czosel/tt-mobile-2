@@ -12,7 +12,7 @@ defmodule TtMobile.Games do
     %Game{}
     |> Game.changeset(attrs)
     |> Repo.insert(
-      on_conflict: {:replace, [:start, :result, :home_team_id, :guest_team_id]},
+      on_conflict: {:replace, [:start, :result, :league_id, :home_team_id, :guest_team_id]},
       conflict_target: [:code]
     )
   end
