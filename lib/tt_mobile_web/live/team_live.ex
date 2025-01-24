@@ -9,7 +9,7 @@ defmodule TtMobileWeb.TeamLive do
       <h1>{@team.name}</h1>
       <table>
         <tr :for={player <- @team.players}>
-          <td>{player.name}</td>
+          <td><.link navigate={~p"/player/#{player.id}"}>{player.name}</.link></td>
         </tr>
       </table>
     </div>

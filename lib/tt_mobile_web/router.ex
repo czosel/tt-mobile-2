@@ -22,6 +22,7 @@ defmodule TtMobileWeb.Router do
     live "/league/:league_id", LeagueLive
     live "/club/:club_id", ClubLive
     live "/team/:team_id", TeamLive
+    live "/player/:player_id", PlayerLive
   end
 
   # Other scopes may use custom stacks.
