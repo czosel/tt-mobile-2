@@ -5,12 +5,14 @@ defmodule TtMobileWeb.HomeLive do
 
   def render(assigns) do
     ~H"""
-    Associations
-    <ul>
-      <li :for={assoc <- @associations}>
-        <.link navigate={~p"/assoc/#{assoc.id}"}>{assoc.name}</.link>
-      </li>
-    </ul>
+    <.card>
+      <:header>Punktspiele</:header>
+      <ul>
+        <.listlink :for={assoc <- @associations} navigate={~p"/assoc/#{assoc.id}"}>
+          {assoc.name}
+        </.listlink>
+      </ul>
+    </.card>
     """
   end
 

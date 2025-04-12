@@ -673,4 +673,50 @@ defmodule TtMobileWeb.CoreComponents do
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
+
+  # ---------------------------------------------------
+  # TT-mobile specific components
+  # ---------------------------------------------------
+
+  def card(assigns) do
+    ~H"""
+    <div class="p-4 rounded-m border shadow-lg">
+      <h2 class="font-bold mb-2">{render_slot(@header)}</h2>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  def listlink(assigns) do
+    ~H"""
+    <li class="p-2 hover:bg-gray-200 border-b">
+      <.link navigate={@navigate} class="flex justify-between">
+        {render_slot(@inner_block)}
+        <.icon name="hero-chevron-right" />
+      </.link>
+    </li>
+    """
+  end
+
+  def h1(assigns) do
+    ~H"""
+    <h1 class="text-xl font-bold mb-4">{render_slot(@inner_block)}</h1>
+    """
+  end
+
+  def buttongroup(assigns) do
+    ~H"""
+    <div class="flex items-center items-stretch">
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  def linkbutton(assigns) do
+    ~H"""
+    <.link patch={@patch} class="px-4 py-2 border">
+      {render_slot(@inner_block)}
+    </.link>
+    """
+  end
 end

@@ -7,11 +7,11 @@ defmodule TtMobileWeb.AssociationLive do
   def render(assigns) do
     ~H"""
     <div :if={@assoc}>
-      <h1>{@assoc.name}</h1>
+      <.h1>{@assoc.name}</.h1>
       <ul>
-        <li :for={league <- @assoc.leagues}>
-          <.link navigate={~p"/league/#{league.id}"}>{league.name}</.link>
-        </li>
+        <.listlink :for={league <- @assoc.leagues} navigate={~p"/league/#{league.id}"}>
+          {league.name}
+        </.listlink>
       </ul>
     </div>
     """

@@ -7,10 +7,12 @@ defmodule TtMobileWeb.LeagueLive do
   def render(assigns) do
     ~H"""
     <div :if={@league}>
-      <h1>{@league.name}</h1>
+      <.h1>{@league.name}</.h1>
 
-      <.link patch={~p"/league/#{@league.id}"}>Tabelle</.link>
-      <.link patch={~p"/league/#{@league.id}?show=schedule"}>Spielplan</.link>
+      <.buttongroup>
+        <.linkbutton patch={~p"/league/#{@league.id}"}>Tabelle</.linkbutton>
+        <.linkbutton patch={~p"/league/#{@league.id}?show=schedule"}>Spielplan</.linkbutton>
+      </.buttongroup>
 
       <.league_table :if={@show == "table"} league={@league} />
       <.league_schedule :if={@show == "schedule"} league={@league} />
