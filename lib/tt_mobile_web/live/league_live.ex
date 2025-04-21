@@ -38,7 +38,7 @@ defmodule TtMobileWeb.LeagueLive do
       </thead>
       <tbody>
         <%= for team <- @league.teams do %>
-          <.trlink phx-click="navigate_to_team" phx-value-id={team.id}>
+          <.trlink on_click="navigate_to_team" link_id={team.id}>
             <.td></.td>
             <.td>{team.name}</.td>
             <.td>{team.game_count}</.td>
@@ -68,7 +68,7 @@ defmodule TtMobileWeb.LeagueLive do
       </thead>
       <tbody>
         <%= for game <- @league.games do %>
-          <.trlink phx-click="navigate_to_game" phx-value-id={game.id}>
+          <.trlink on_click="navigate_to_game" link_id={game.id}>
             <.td>{game.start}</.td>
             <.td>
               <.link navigate={~p"/team/#{game.home_team.id}"}>{game.home_team.name}</.link>

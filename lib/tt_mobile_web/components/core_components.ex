@@ -746,7 +746,11 @@ defmodule TtMobileWeb.CoreComponents do
 
   def trlink(assigns) do
     ~H"""
-    <tr class="border-b hover:bg-gray-200 cursor-pointer">
+    <tr
+      class="border-b hover:bg-gray-200 cursor-pointer"
+      phx-click={@on_click}
+      phx-value-id={@link_id}
+    >
       {render_slot(@inner_block)}
       <.td class="w-1"><.icon name="hero-chevron-right" /></.td>
     </tr>

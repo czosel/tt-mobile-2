@@ -82,7 +82,8 @@ defmodule TtMobile.Scraper do
 
     response.body
     |> Floki.find("table.matrix td ul li span a")
-    |> Enum.map(fn link ->
+    |> Enum.with_index()
+    |> Enum.map(fn {link, sort} ->
       %{
         id:
           link
@@ -91,7 +92,8 @@ defmodule TtMobile.Scraper do
           |> extract_query_param("group")
           |> String.to_integer(),
         name: link |> text(),
-        association_id: assoc_id
+        association_id: assoc_id,
+        sort: sort
       }
     end)
     |> Enum.map(&Leagues.upsert_league/1)
@@ -132,8 +134,8 @@ defmodule TtMobile.Scraper do
         code: attrs.code,
         start: to_naive_datetime(attrs.date, attrs.time),
         league_id: league.id,
-        home_team_id: home_team.id,
-        guest_team_id: guest_team.id,
+        home_team_id: if(home_team, do: home_team.id, else: nil),
+        guest_team_id: if(guest_team, do: guest_team.id, else: nil),
         result: attrs.result
       }
     end)

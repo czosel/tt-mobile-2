@@ -9,7 +9,15 @@ defmodule TtMobile.Associations do
   end
 
   def get_association!(id) do
-    Repo.get!(Association, id) |> Repo.preload(:leagues)
+    Repo.get!(Association, id)
+    |> Repo.preload(
+      leagues:
+        from(
+          l in TtMobile.Leagues.League,
+          order_by: [asc: l.sort]
+        )
+    )
+    |> Repo.preload(:leagues)
   end
 
   def upsert_association(attrs) do

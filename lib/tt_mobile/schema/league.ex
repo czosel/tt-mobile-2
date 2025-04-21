@@ -7,6 +7,7 @@ defmodule TtMobile.Leagues.League do
   @derive {Phoenix.Param, key: :id}
   schema "league" do
     field :name, :string
+    field :sort, :integer
     belongs_to :association, TtMobile.Associations.Association
     has_many :games, TtMobile.Games.Game
     has_many :teams, TtMobile.Teams.Team
@@ -14,7 +15,7 @@ defmodule TtMobile.Leagues.League do
 
   def changeset(league, attrs) do
     league
-    |> cast(attrs, [:id, :name, :association_id])
+    |> cast(attrs, [:id, :name, :sort, :association_id])
     |> validate_required([:name, :association_id])
     |> unique_constraint(:id, name: :league_pkey)
   end

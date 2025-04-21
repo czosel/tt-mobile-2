@@ -7,11 +7,23 @@ defmodule TtMobile.Leagues do
   def get_league!(id, opts \\ []) do
     League
     |> Repo.get!(id)
+    |> Repo.preload(
+      games:
+        from(
+          g in TtMobile.Games.Game,
+          order_by: [asc: g.start]
+        ),
+      teams:
+        from(
+          t in TtMobile.Teams.Team,
+          order_by: [desc: t.points_won, desc: t.games_won]
+        )
+    )
     |> Repo.preload(Keyword.get(opts, :preload, []))
   end
 
   def get_team_by_name(league, name) do
-    Enum.find(league.teams, fn team -> team.name == name end) |> IO.inspect()
+    Enum.find(league.teams, fn team -> team.name == name end)
   end
 
   def upsert_league(attrs) do
