@@ -22,67 +22,65 @@ defmodule TtMobileWeb.LeagueLive do
 
   def league_table(assigns) do
     ~H"""
-    <table>
+    <.table>
       <thead>
-        <tr>
-          <th></th>
-          <th>Mannschaft</th>
-          <th>Beg.</th>
-          <th>S</th>
-          <th>U</th>
-          <th>N</th>
-          <th>Spiele</th>
-          <th>+/-</th>
-          <th>Punkte</th>
-        </tr>
+        <.tr>
+          <.th></.th>
+          <.th>Mannschaft</.th>
+          <.th>Beg.</.th>
+          <.th>S</.th>
+          <.th>U</.th>
+          <.th>N</.th>
+          <.th>Spiele</.th>
+          <.th>+/-</.th>
+          <.th>Punkte</.th>
+        </.tr>
       </thead>
       <tbody>
         <%= for team <- @league.teams do %>
-          <tr>
-            <td></td>
-            <td>
-              <.link navigate={~p"/team/#{team.id}"}>{team.name}</.link>
-            </td>
-            <td>{team.game_count}</td>
-            <td>{team.win_count}</td>
-            <td>{team.draw_count}</td>
-            <td>{team.lose_count}</td>
-            <td>{team.games_won}:{team.games_lost}</td>
-            <td>{team.games_won - team.games_lost}</td>
-            <td>{team.points_won}:{team.points_lost}</td>
-          </tr>
+          <.trlink phx-click="navigate_to_team" phx-value-id={team.id}>
+            <.td></.td>
+            <.td>{team.name}</.td>
+            <.td>{team.game_count}</.td>
+            <.td>{team.win_count}</.td>
+            <.td>{team.draw_count}</.td>
+            <.td>{team.lose_count}</.td>
+            <.td>{team.games_won}:{team.games_lost}</.td>
+            <.td>{team.games_won - team.games_lost}</.td>
+            <.td>{team.points_won}:{team.points_lost}</.td>
+          </.trlink>
         <% end %>
       </tbody>
-    </table>
+    </.table>
     """
   end
 
   def league_schedule(assigns) do
     ~H"""
-    <table>
+    <.table>
       <thead>
-        <tr>
-          <th>Datum</th>
-          <th>Heim</th>
-          <th>Gast</th>
-          <th>Ergebnis</th>
-        </tr>
+        <.tr>
+          <.th>Datum</.th>
+          <.th>Heim</.th>
+          <.th>Gast</.th>
+          <.th>Ergebnis</.th>
+        </.tr>
       </thead>
       <tbody>
         <%= for game <- @league.games do %>
-          <tr>
-            <td>{game.start}</td>
-            <td>
+          <.trlink phx-click="navigate_to_game" phx-value-id={game.id}>
+            <.td>{game.start}</.td>
+            <.td>
               <.link navigate={~p"/team/#{game.home_team.id}"}>{game.home_team.name}</.link>
-            </td>
-            <td>
+            </.td>
+            <.td>
               <.link navigate={~p"/team/#{game.guest_team.id}"}>{game.guest_team.name}</.link>
-            </td>
-            <td>{game.result}</td>
-          </tr>
+            </.td>
+            <.td>{game.result}</.td>
+          </.trlink>
         <% end %>
       </tbody>
-    </table>
+    </.table>
     """
   end
 
@@ -123,5 +121,13 @@ defmodule TtMobileWeb.LeagueLive do
 
     socket
     |> assign(league: league)
+  end
+
+  def handle_event("navigate_to_team", %{"id" => id}, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/team/#{id}")}
+  end
+
+  def handle_event("navigate_to_game", %{"id" => id}, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/game/#{id}")}
   end
 end

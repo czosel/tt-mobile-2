@@ -468,7 +468,7 @@ defmodule TtMobileWeb.CoreComponents do
 
   slot :action, doc: "the slot for showing user actions in the last table column"
 
-  def table(assigns) do
+  def _table(assigns) do
     assigns =
       with %{rows: %Phoenix.LiveView.LiveStream{}} <- assigns do
         assign(assigns, row_id: assigns.row_id || fn {id, _item} -> id end)
@@ -717,6 +717,49 @@ defmodule TtMobileWeb.CoreComponents do
     <.link patch={@patch} class="px-4 py-2 border">
       {render_slot(@inner_block)}
     </.link>
+    """
+  end
+
+  def table(assigns) do
+    ~H"""
+    <table class="w-full">
+      {render_slot(@inner_block)}
+    </table>
+    """
+  end
+
+  def th(assigns) do
+    ~H"""
+    <th class="py-2 text-left font-bold">
+      {render_slot(@inner_block)}
+    </th>
+    """
+  end
+
+  def tr(assigns) do
+    ~H"""
+    <tr class="border-b">
+      {render_slot(@inner_block)}
+    </tr>
+    """
+  end
+
+  def trlink(assigns) do
+    ~H"""
+    <tr class="border-b hover:bg-gray-200 cursor-pointer">
+      {render_slot(@inner_block)}
+      <.td class="w-1"><.icon name="hero-chevron-right" /></.td>
+    </tr>
+    """
+  end
+
+  attr :class, :string, default: nil
+
+  def td(assigns) do
+    ~H"""
+    <td class={["py-2", @class]}>
+      {render_slot(@inner_block)}
+    </td>
     """
   end
 end
