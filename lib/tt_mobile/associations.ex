@@ -4,8 +4,14 @@ defmodule TtMobile.Associations do
 
   alias TtMobile.Associations.Association
 
-  def list_associations do
-    Repo.all(Association)
+  def list_current_associations() do
+    from(
+      a in Association,
+      # TODO : remove hardcoded season_id
+      where: a.season_id == 1,
+      order_by: [asc: a.name]
+    )
+    |> Repo.all()
   end
 
   def get_association!(id) do

@@ -36,7 +36,7 @@ defmodule TtMobileWeb.HomeLive do
   end
 
   def assign_associations(socket) do
-    associations = Associations.list_associations()
+    associations = Associations.list_current_associations()
 
     socket
     |> assign(associations: associations)

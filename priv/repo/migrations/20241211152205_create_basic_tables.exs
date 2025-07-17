@@ -2,9 +2,16 @@ defmodule TtMobile.Repo.Migrations.CreateBasicTables do
   use Ecto.Migration
 
   def change do
+    create table(:season) do
+      add :name, :string
+    end
+
+    create unique_index(:season, [:name])
+
     create table(:association) do
       add :name, :string
       add :code, :string
+      add :season_id, references(:season)
     end
 
     create unique_index(:association, [:code])

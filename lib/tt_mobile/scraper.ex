@@ -11,6 +11,7 @@ defmodule TtMobile.Scraper do
   alias TtMobile.Repo
   alias TtMobile.Leagues
   alias TtMobile.Associations
+  alias TtMobile.Seasons
   alias TtMobile.Teams
   alias TtMobile.Games
   alias TtMobile.Players
@@ -56,11 +57,35 @@ defmodule TtMobile.Scraper do
     |> Map.get(key)
   end
 
-  def associations() do
-    response = HTTPoison.get!("#{@root_url}/index.htm.de")
+  defp extract_season(name) do
+    # extract the season from the name, e.g.
+    # "MTTV Mannschaftsmeisterschaft 2023/24" -> "2023/24"
+    case Regex.run(~r/\d{4}\/\d{2}/, name) do
+      [season] -> season
+      _ -> nil
+    end
+  end
 
-    response.body
-    |> Floki.find("div#navigation li strong:fl-contains('Spielbetrieb') + ul li a")
+  defp extract_and_save_associations(links) do
+    links
+    |> Enum.map(&text/1)
+    |> Enum.map(&extract_season/1)
+    |> Enum.uniq()
+    |> Enum.map(fn season ->
+      %{name: season}
+    end)
+    |> Enum.map(&Seasons.upsert_season/1)
+    |> Enum.reduce(%{}, fn {:ok, season}, acc ->
+      Map.put(acc, season.id, season.name)
+    end)
+
+    seasons_by_name =
+      Seasons.list_all_seasons()
+      |> Enum.reduce(%{}, fn season, acc ->
+        Map.put(acc, season.name, season.id)
+      end)
+
+    links
     |> Enum.map(fn link ->
       %{
         code:
@@ -68,10 +93,25 @@ defmodule TtMobile.Scraper do
           |> Floki.attribute("href")
           |> Enum.at(0)
           |> extract_query_param("championship"),
-        name: link |> text()
+        name: link |> text(),
+        season_id: Map.get(seasons_by_name, link |> text() |> extract_season())
       }
     end)
     |> Enum.map(&Associations.upsert_association/1)
+  end
+
+  def associations() do
+    # current season
+    HTTPoison.get!("#{@root_url}/index.htm.de")
+    |> Map.get(:body)
+    |> Floki.find("div#navigation li strong:fl-contains('Spielbetrieb') + ul li a")
+    |> extract_and_save_associations()
+
+    # historical seasons
+    HTTPoison.get!("#{@base_url}championshipArchive?federation=STT")
+    |> Map.get(:body)
+    |> Floki.find("table.matrix td a")
+    |> extract_and_save_associations()
   end
 
   def association(assoc_id) do
@@ -275,8 +315,6 @@ defmodule TtMobile.Scraper do
       "#{@base_url}groupMeetingReport?meeting=#{game_id}&championship=#{URI.encode(league.association.code)}&group=#{league.id}"
 
     response = HTTPoison.get!(url)
-
-    IO.inspect(response, label: "Response")
 
     data =
       response.body
