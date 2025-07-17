@@ -265,6 +265,37 @@ defmodule TtMobile.Scraper do
     team_id
   end
 
+  def game(game_id) do
+    game = Games.get_game!(game_id, preload: [league: :association])
+    league = game.league
+
+    IO.puts("Fetching game #{game_id} for league #{league.id}")
+
+    url =
+      "#{@base_url}groupMeetingReport?meeting=#{game_id}&championship=#{URI.encode(league.association.code)}&group=#{league.id}"
+
+    response = HTTPoison.get!(url)
+
+    IO.inspect(response, label: "Response")
+
+    data =
+      response.body
+      |> Floki.find("table.result-set > tr:not(:first-child)")
+      |> Enum.map(&Floki.children/1)
+      |> Enum.map(fn row ->
+        %{
+          home: row |> Enum.at(2) |> text,
+          guest: row |> Enum.at(4) |> text,
+          result: row |> Enum.at(6) |> text
+        }
+      end)
+
+    %{
+      game_id: game_id,
+      data: data
+    }
+  end
+
   def club(club_id) do
     url = "#{@base_url}clubInfoDisplay?club=#{club_id}"
     response = HTTPoison.get!(url)

@@ -4,8 +4,10 @@ defmodule TtMobile.Games do
 
   alias TtMobile.Games.Game
 
-  def get_game!(id) do
-    Repo.get!(Game, id)
+  def get_game!(id, opts \\ []) do
+    Game
+    |> Repo.get!(id)
+    |> Repo.preload(Keyword.get(opts, :preload, []))
   end
 
   def upsert_game(attrs) do

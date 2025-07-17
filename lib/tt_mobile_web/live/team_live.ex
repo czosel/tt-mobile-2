@@ -23,7 +23,6 @@ defmodule TtMobileWeb.TeamLive do
       :noreply,
       socket
       |> assign_team(team_id)
-      |> assign(:data, [])
       |> start_async(:scrape, fn -> TtMobile.Scraper.team(team_id) end)
     }
   end
