@@ -4,17 +4,26 @@ defmodule TtMobile.AssociationsFixtures do
   entities via the `TtMobile.Associations` context.
   """
 
+  alias TtMobile.Associations
+  alias TtMobile.Seasons
+
   @doc """
   Generate a association.
   """
   def association_fixture(attrs \\ %{}) do
+    {:ok, season} =
+      attrs
+      |> Enum.into(%{ name: "2024/25" })
+      |> Seasons.upsert_season()
+
     {:ok, association} =
       attrs
       |> Enum.into(%{
         name: "Nationalliga 2024/25",
-        code: "STT 24/25"
+        code: "STT 24/25",
+        season_id: season.id
       })
-      |> TtMobile.Associations.upsert_association()
+      |> Associations.upsert_association()
 
     association
   end

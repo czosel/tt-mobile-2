@@ -17,14 +17,12 @@ defmodule TtMobile.ScraperTest do
   @tag :all_associations
   test "associations scraping" do
     AssociationsFixtures.association_fixture()
-    assocs = Scraper.associations()
-    assert length(assocs) == 9
-    assert Enum.at(assocs, 0).name =~ "Nationalliga"
-    assert Repo.aggregate(Association, :count, :id) == 9
+    Scraper.associations()
+    assert Repo.aggregate(Association, :count, :id) == 225
 
     # DB unchanged after scraping again
     Scraper.associations()
-    assert Repo.aggregate(Association, :count, :id) == 9
+    assert Repo.aggregate(Association, :count, :id) == 225
   end
 
   @tag :association

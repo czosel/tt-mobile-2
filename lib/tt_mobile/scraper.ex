@@ -41,6 +41,7 @@ defmodule TtMobile.Scraper do
     # still WIP
     data =
       response.body
+      |> Floki.parse_document!()
       |> Floki.find("table.result-set > tr:not(:first-child)")
       |> Enum.map(&Floki.children/1)
 
@@ -104,12 +105,14 @@ defmodule TtMobile.Scraper do
     # current season
     HTTPoison.get!("#{@root_url}/index.htm.de")
     |> Map.get(:body)
+    |> Floki.parse_document!()
     |> Floki.find("div#navigation li strong:fl-contains('Spielbetrieb') + ul li a")
     |> extract_and_save_associations()
 
     # historical seasons
     HTTPoison.get!("#{@base_url}championshipArchive?federation=STT")
     |> Map.get(:body)
+    |> Floki.parse_document!()
     |> Floki.find("table.matrix td a")
     |> extract_and_save_associations()
   end
@@ -121,6 +124,7 @@ defmodule TtMobile.Scraper do
     response = HTTPoison.get!(url)
 
     response.body
+    |> Floki.parse_document!()
     |> Floki.find("table.matrix td ul li span a")
     |> Enum.with_index()
     |> Enum.map(fn {link, sort} ->
@@ -148,6 +152,7 @@ defmodule TtMobile.Scraper do
     response = HTTPoison.get!(url)
 
     response.body
+    |> Floki.parse_document!()
     |> Floki.find("table.result-set > tr:not(:first-child)")
     |> Enum.map(&Floki.children/1)
     |> Enum.map(fn row ->
@@ -199,6 +204,7 @@ defmodule TtMobile.Scraper do
     response = HTTPoison.get!(url)
 
     response.body
+    |> Floki.parse_document!()
     |> Floki.find("table.result-set > tr:not(:first-child)")
     |> Enum.map(&Floki.children/1)
     |> Enum.map(fn row ->
@@ -268,6 +274,7 @@ defmodule TtMobile.Scraper do
 
     players =
       response.body
+      |> Floki.parse_document!()
       |> Floki.find("#content-row2 table.result-set:last-of-type tr")
       |> Enum.map(&Floki.children/1)
       |> Enum.filter(fn row ->
@@ -318,6 +325,7 @@ defmodule TtMobile.Scraper do
 
     data =
       response.body
+      |> Floki.parse_document!()
       |> Floki.find("table.result-set > tr:not(:first-child)")
       |> Enum.map(&Floki.children/1)
       |> Enum.map(fn row ->
@@ -340,6 +348,7 @@ defmodule TtMobile.Scraper do
 
     data =
       response.body
+      |> Floki.parse_document!()
       |> Floki.find("h2:fl-contains('Rückschau') + table tr")
       # remove table head
       |> tl
@@ -355,6 +364,7 @@ defmodule TtMobile.Scraper do
 
     name =
       response.body
+      |> Floki.parse_document!()
       |> Floki.find("h1")
       |> Enum.map(&Floki.children/1)
       |> Enum.at(0)
